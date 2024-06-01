@@ -49,6 +49,12 @@ shadowJar {
 jar {
     setArchiveClassifier("slim")
     finalizedBy(shadowJar)
+
+    manifest {
+        attributes([
+                'Main-Class': 'dev.firstdark.servermeta.MetaServer'
+        ])
+    }
 }
 
 shadowJar.doLast {
