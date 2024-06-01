@@ -28,9 +28,6 @@ public class MetaServer {
     
     
     public static void main(String[] args) {
-        
-        metaReader.start();
-
         threader.scheduleAtFixedRate(() -> {
             if (metaReader == null || !metaReader.isAlive()) {
                 metaReader = new MinecraftMetaReader();
