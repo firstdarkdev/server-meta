@@ -1,0 +1,56 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'dev.firstdark.servermeta'
+version = "${version_major}.${version_minor}.${version_patch}"
+
+repositories {
+    mavenCentral()
+
+    maven {
+        url "https://maven.firstdark.dev/releases"
+    }
+}
+
+configurations {
+    shaded
+    implementation.extendsFrom shaded
+}
+
+dependencies {
+    shaded "com.google.code.gson:gson:${gson}"
+    shaded "com.squareup.okhttp3:okhttp:${okhttp}"
+    shaded "com.hypherionmc.jsondb:jsondb-core:${jsondb}"
+    shaded "io.javalin:javalin:${javalin}"
+    shaded "org.apache.maven:maven-artifact:${maven_art}"
+    shaded "org.dom4j:dom4j:${dom4j}"
+
+    // Logging
+    shaded "org.apache.logging.log4j:log4j-api:${log4j}"
+    shaded "org.apache.logging.log4j:log4j-core:${log4j}"
+    shaded "org.apache.logging.log4j:log4j-slf4j2-impl:${log4j}"
+
+    compileOnly "org.projectlombok:lombok:${lombok}"
+    annotationProcessor "org.projectlombok:lombok:${lombok}"
+}
+
+shadowJar {
+    from sourceSets.main.output
+    configurations = [project.configurations.shaded]
+    setArchiveClassifier(null)
+
+    if (project.hasProperty("isDocker") && project.isDocker == true) {
+        setArchiveFileName("servermeta.jar")
+    }
+}
+
+jar {
+    setArchiveClassifier("slim")
+    finalizedBy(shadowJar)
+}
+
+shadowJar.doLast {
+    delete jar.getArchiveFile()
+}

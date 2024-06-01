@@ -1,0 +1,13 @@
+services:
+  server-meta:
+    build: .
+    container_name: "server-meta"
+    restart: unless-stopped
+    volumes:
+      - ../storage/data:/app/data
+    networks:
+      - fdd-docker
+
+networks:
+  fdd-docker:
+    external: true
