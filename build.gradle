@@ -41,7 +41,7 @@ shadowJar {
     configurations = [project.configurations.shaded]
     setArchiveClassifier(null)
 
-    if (project.hasProperty("isDocker") && project.isDocker == true) {
+    if (project.hasProperty("isDocker") && project.isDocker == 'true') {
         setArchiveFileName("servermeta.jar")
     }
 }
