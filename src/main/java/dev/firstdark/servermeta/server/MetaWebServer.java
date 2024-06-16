@@ -8,6 +8,8 @@ import dev.firstdark.servermeta.models.api.VersionResponse;
 import dev.firstdark.servermeta.utils.MinecraftVersionConverter;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import io.javalin.http.Header;
+import io.javalin.plugin.bundled.CorsPluginConfig;
 import lombok.Getter;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -37,8 +39,8 @@ public class MetaWebServer {
     private final Javalin javalin;
 
     protected MetaWebServer() {
-        javalin = Javalin.create();
-
+        javalin = Javalin.create(c -> c.plugins.enableCors(cors -> cors.add(CorsPluginConfig::anyHost)));
+        javalin.before(ctx -> ctx.header(Header.ACCESS_CONTROL_ALLOW_ORIGIN, "*").header(Header.ACCESS_CONTROL_ALLOW_HEADERS, "Origin, X-Requested-With, Content-Type, Accept"));
         javalin.routes(() -> path("v1/{platform}", () -> get("/", this::getAllVersions)));
     }
 
