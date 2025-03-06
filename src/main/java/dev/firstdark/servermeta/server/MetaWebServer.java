@@ -4,6 +4,7 @@ import dev.firstdark.servermeta.MetaServer;
 import dev.firstdark.servermeta.database.DatabaseController;
 import dev.firstdark.servermeta.database.IVersionTable;
 import dev.firstdark.servermeta.database.tables.*;
+import dev.firstdark.servermeta.models.api.MetaResponse;
 import dev.firstdark.servermeta.models.api.VersionResponse;
 import dev.firstdark.servermeta.utils.MinecraftVersionConverter;
 import io.javalin.Javalin;
@@ -14,6 +15,7 @@ import lombok.Getter;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.javalin.apibuilder.ApiBuilder.get;
 import static io.javalin.apibuilder.ApiBuilder.path;
@@ -43,8 +45,43 @@ public class MetaWebServer {
         javalin.before(ctx -> ctx.header(Header.ACCESS_CONTROL_ALLOW_ORIGIN, "*").header(Header.ACCESS_CONTROL_ALLOW_HEADERS, "Origin, X-Requested-With, Content-Type, Accept"));
         javalin.routes(() -> path("v1/{platform}", () -> {
             get("/", this::getAllVersions);
+            get("/meta", this::getMeta);
             get("/{version}", this::getVersion);
         }));
+    }
+
+    private void getMeta(Context context) {
+        String platform = context.pathParam("platform");
+        Class<?> t = routes.get(platform);
+        HashMap<String, List<String>> returnVersions = new HashMap<>();
+
+        try {
+            List<IVersionTable> results = (List<IVersionTable>) DatabaseController.INSTANCE.getDB().getCollection(t);
+            for (IVersionTable res : results) {
+                String version = res.toVersionResponse().getVersion();
+                if (!platform.equalsIgnoreCase("vanilla")) {
+                    if (version.contains("+")) {
+                        version = version.split("\\+")[0];
+                    }
+
+                    if (version.contains("-")) {
+                        version = version.split("-")[0];
+                    }
+                }
+
+                returnVersions.computeIfAbsent(version, k -> new ArrayList<>()).add(res.toVersionResponse().getVersion().replace(version + "+", "").replace(version + "-", ""));
+            }
+
+            List<String> sortedGameVersions = new ArrayList<>(returnVersions.keySet().stream().sorted(Comparator.comparing(MinecraftVersionConverter::parse)).toList());
+            Collections.reverse(sortedGameVersions);
+
+            context.json(new MetaResponse(sortedGameVersions, returnVersions));
+            return;
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
+
+        context.status(404);
     }
 
     private void getVersion(Context context) {

@@ -64,7 +64,11 @@ public class MinecraftVersionConverter {
         int year = Integer.parseInt(y);
         int week = Integer.parseInt(w);
 
-        if (year >= 24 && week >= 33) {
+        if (year == 25 && week >= 2 || year > 25) {
+            return "1.21.5";
+        } else if (year == 24 && week >= 44) {
+            return "1.21.4";
+        } else if (year == 24 && week >= 33 && week <= 40) {
             return "1.21.2";
         } else if (year == 24 && week >= 18 && week <= 21) {
             return "1.21";
