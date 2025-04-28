@@ -219,6 +219,8 @@ public class MinecraftVersionConverter {
             case "24w14potato" ->
                 // Minecraft 24w14potato, forked from 24w12a
                     "1.20.5-alpha.24.12.potato";
+            case "25w14craftmine" ->
+                "1.20.5-alpha.25.14.craftmine";
             default -> null; //Don't recognise the version
         };
     }
